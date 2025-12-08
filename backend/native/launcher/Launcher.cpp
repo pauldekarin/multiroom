@@ -4,8 +4,6 @@
 
 #include "Launcher.hpp"
 
-#include <boost/asio/signal_set.hpp>
-
 
 Launcher::Launcher()
 = default;
@@ -73,12 +71,22 @@ void Launcher::launch_(const settings& settings)
     snapserverSession.module = &snapserverModule;
     snapserverSession.params = settings.module.snapserver;
 
+    ServerModule serverModule(&services);
+    TCPHealthChecker serverChecker(&serverModule, &services, {
+                                       settings.module.server.port
+                                   });
+    ModuleSession serverSession;
+    serverSession.checker = &serverChecker;
+    serverSession.module = &serverModule;
+    serverSession.params = settings.module.server;
+
 
     manager_ = std::make_unique<ModuleManager>(&services);
     manager_->add(routerSession);
     manager_->add(loopbackSession);
     manager_->add(snapserverSession);
     manager_->add(snapclientSession);
+    manager_->add(serverSession);
 
     manager_->startup(settings.manager);
 

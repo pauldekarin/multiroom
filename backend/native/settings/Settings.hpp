@@ -34,6 +34,25 @@ struct settings
 
     struct s_module
     {
+        struct s_server : module_description
+        {
+            std::string cmd = Path::bin("server");
+            int port = 8080;
+
+            s_server()
+            {
+                name = "server";
+            }
+
+            s_server(const s_server& oth) = default;
+            s_server& operator=(const s_server& oth) = default;
+
+            bool operator==(const s_server& other) const
+            {
+                return cmd == other.cmd && port == other.port;
+            }
+        };
+
         struct s_loopback : module_description
         {
             std::string virtualSinkName = "VirtualSink";
@@ -166,6 +185,7 @@ struct settings
             }
         };
 
+        s_server server;
         s_router router;
         s_loopback loopback;
         s_snapserver snapserver;
@@ -181,7 +201,8 @@ using ModuleParams = std::variant<
     settings::s_module::s_router,
     settings::s_module::s_loopback,
     settings::s_module::s_snapserver,
-    settings::s_module::s_snapclient
+    settings::s_module::s_snapclient,
+    settings::s_module::s_server
 >;
 
 inline module_description module_cast(const ModuleParams& params)

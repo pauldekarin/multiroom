@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -99,22 +101,20 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := flag.Int("port", 8080, "Port to listen on")
+	flag.Parse()
+
+	addr := fmt.Sprintf(":%d", *port)
+
 	hub := newHub()
 	go hub.run()
 
-	// 1. Static files
-	//dist := http.FileServer(http.Dir("../front/dist"))
-	//http.Handle("/", dist)
-
-	// 2. API
 	http.HandleFunc("/api/config", configHandler)
-
-	// 3. Websocket
 	http.HandleFunc("/ws", hub.upgradeHandler)
 
-	log.Println("Listening on :8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
+	log.Printf("Listening on %s\n", addr)
+
+	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal(err)
 	}
 }

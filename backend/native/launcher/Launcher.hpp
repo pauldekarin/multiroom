@@ -13,7 +13,9 @@
 #include <boost/thread/mutex.hpp>
 #include <iostream>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/signal_set.hpp>
 
+#include "../modules/server/ServerModule.hpp"
 #include "../services/PulseMainloopService.hpp"
 
 class Launcher
