@@ -23,6 +23,7 @@ public:
     ~Port();
     static std::shared_ptr<Port> bind(int port);
     static bool isBound(int port);
+    static bool invalid(int port);
     void release();
 
 private:

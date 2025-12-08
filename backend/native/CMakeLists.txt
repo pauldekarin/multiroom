@@ -68,10 +68,8 @@ add_executable(multiroom
         health_checker/InternalHealthChecker.cpp
         health_checker/TcpHealthChecker.cpp
         modules/router/AudioRouterModule.cpp
-        settings/ModuleParams.hpp
         settings/SettingsObservable.cpp
-        settings/SettingsObservable.hpp
-        modules/loopback/IAudioLoopbackModule.hpp
+        modules/server/ServerModule.cpp
 
 )
 
@@ -154,6 +152,11 @@ if (RUN_TESTS)
             tests/PortAudioSourceStreamTests.cpp
             tests/FIFOAudioSinkStreamTests.cpp
             tests/InternalHealthCheckerTests.cpp
+            tests/TCPHealthCheckerTests.cpp
+            tests/ModuleManagerTests.cpp
+            tests/AudioRouterModuleTests.cpp
+            tests/PulseMainloopServiceTests.cpp
+            tests/ServerModuleTests.cpp
 
             util/Port.cpp
             util/LinuxProcess.cpp
@@ -166,19 +169,15 @@ if (RUN_TESTS)
             modules/manager/ModuleManager.cpp
             modules/snapclient/SnapclientModule.cpp
             modules/snapserver/SnapserverModule.cpp
-            tests/AudioRouterModuleTests.cpp
-            tests/PulseMainloopServiceTests.cpp
             services/PulseMainloopService.cpp
             modules/loopback/AudioLoopbackModule.cpp
             modules/router/AudioRouterModule.cpp
             modules/loopback/PulseAudioLoopbackModule.cpp
+            modules/server/ServerModule.cpp
             stream/PortAudioSourceStream.cpp
             stream/FIFOAudioSinkStream.cpp
             health_checker/TcpHealthChecker.cpp
             health_checker/InternalHealthChecker.cpp
-            tests/TCPHealthCheckerTests.cpp
-            tests/ModuleManagerTests.cpp
-
     )
 
     target_link_libraries(multiroom_tests PUBLIC

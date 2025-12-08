@@ -30,6 +30,7 @@
 #include "../health_checker/TcpHealthChecker.hpp"
 #include "../util/Port.hpp"
 #include "../modules/manager/ModuleManager.hpp"
+#include "../modules/server/ServerModule.hpp"
 
 class TestData
 {

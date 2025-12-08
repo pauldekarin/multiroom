@@ -69,6 +69,11 @@ bool Port::isBound(int port)
     return false;
 }
 
+bool Port::invalid(int port)
+{
+    return port <= 0;
+}
+
 void Port::release()
 {
     LOGGER_->info("Release port {}", port_);
