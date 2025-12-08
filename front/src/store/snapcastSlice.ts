@@ -43,6 +43,13 @@ export const snapcastSlice = createSlice({
 
 export const createSnapcastMiddleware = () => {
     const snapcast = new SnapcastService();
+    const connect = (url: string): void => {
+        snapcast.disconnect();
+        if (!URL.canParse(url)) {
+            return;
+        }
+        snapcast.connect(url);
+    }
 
     return (store) => {
         snapcast.on(SnapcastNotificationType.ON_CONNECTION_STATUS, (notification: ISnapcastNotificationPayload) => {
@@ -59,10 +66,7 @@ export const createSnapcastMiddleware = () => {
         })
         return (next) => (action) => {
             if (snapcastSlice.actions.connect.match(action)) {
-                if (snapcast.connected) {
-                    snapcast.disconnect();
-                }
-                snapcast.connect(action.payload as string);
+                connect(action.payload as string);
             }
 
             if (snapcastSlice.actions.setClientMuted.match(action)) {

@@ -231,7 +231,6 @@ namespace Snapcast {
 // interface OnStreamChange { (id: string): void };
 
 class SnapControl {
-
     constructor() {
         this.onChange = null;
         this.onConnectionChanged = null;

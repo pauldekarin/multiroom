@@ -52,9 +52,11 @@ export class SnapcastService {
     }
 
     public disconnect() {
-        this._url = null;
-        this._connectionStatus = ConnectionStatus.DISCONNECTED;
-        this._snapcontrol.disconnect();
+        if (this.url !== null) {
+            this._url = null;
+            this._connectionStatus = ConnectionStatus.DISCONNECTED;
+            this._snapcontrol.disconnect();
+        }
     }
 
     public on(type: SnapcastNotificationType, callback: (arg0: ISnapcastNotificationPayload) => void) {
