@@ -1,6 +1,7 @@
 import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
 import {LoggerFactory} from "../logger/LoggerFactory.ts";
 import type {Logger} from "../logger/Logger.ts";
+import {snapcastSlice} from "./snapcastSlice.ts";
 
 interface ConfigResponse {
     snapserver: SnapserverConfig;
@@ -29,21 +30,25 @@ export interface ConfigurationProps {
     snapserver: SnapserverConfig,
 }
 
+const defaultSnapserverConfig = () => {
+    return {
+        ports: {
+            http: -1,
+            control: -1,
+            stream: -1
+        }
+    }
+}
+
 const name: string = "configuration";
 const initialState: ConfigurationProps = {
     host: window.location.hostname,
-    port: Number(window.location.port),
+    port: Number(8080),
     websocket: {
         path: "/ws",
         port: Number(window.location.port)
     },
-    snapserver: {
-        ports: {
-            http: 1780,
-            stream: 1704,
-            control: 1705
-        }
-    }
+    snapserver: defaultSnapserverConfig()
 }
 
 export const configurationSlice = createSlice({
@@ -61,6 +66,8 @@ export const configurationSlice = createSlice({
         },
         setSnapserverConfiguration: (state, action: PayloadAction<SnapserverConfig>) => {
             state.snapserver = action.payload as SnapserverConfig;
+        },
+        connect: () => {
         }
     }
 })
@@ -68,21 +75,8 @@ export const configurationSlice = createSlice({
 export const createConfigurationMiddleware = () => {
     const logger: Logger = LoggerFactory.getLogger("configuration-middleware");
 
-    return (store) => (next) => (action) => {
-
-        const isHostOrPortAction =
-            configurationSlice.actions.setHost.match(action) ||
-            configurationSlice.actions.setPort.match(action);
-
-        const result = next(action);
-
-        if (isHostOrPortAction) {
-            const state = store.getState().configuration;
-
-            const scheme = "http://";
-            const api = "/api/config";
-            const url = `${scheme}${state.host}:${state.port}${api}`;
-
+    return (store) => {
+        const connect = (url: string) => {
             logger.info(`Fetching configuration from ${url}`);
 
             fetch(url)
@@ -100,8 +94,45 @@ export const createConfigurationMiddleware = () => {
                 })
                 .catch(err => {
                     logger.error("Failed to fetch config:", err);
+                    store.dispatch(
+                        configurationSlice.actions.setSnapserverConfiguration(defaultSnapserverConfig())
+                    )
                 });
         }
-        return result;
-    };
+
+        return (next) => (action) => {
+            if (configurationSlice.actions.setHost.match(action) ||
+                configurationSlice.actions.setPort.match(action)) {
+                const result = next(action);
+
+                const state = store.getState().configuration;
+
+                const scheme = "http://";
+                const api = "/api/config";
+                const url = `${scheme}${state.host}:${state.port}${api}`;
+
+                connect(url);
+
+                return result;
+            }
+            if (configurationSlice.actions.setSnapserverConfiguration.match(action)) {
+                const config = action.payload as SnapserverConfig;
+                const url = `ws://${store.getState().configuration.host}:${config.ports.http}`;
+                store.dispatch({
+                    type: snapcastSlice.actions.connect.type,
+                    payload: url
+                });
+            }
+            if (configurationSlice.actions.connect.match(action)) {
+                const state = store.getState().configuration;
+
+                const scheme = "http://";
+                const api = "/api/config";
+                const url = `${scheme}${state.host}:${state.port}${api}`;
+
+                connect(url);
+            }
+            return next(action);
+        };
+    }
 };
