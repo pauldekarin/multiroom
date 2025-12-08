@@ -32,6 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({onNavigate, page}) => {
     const host = useSelector((state: RootState) => state.configuration.host);
     const port = useSelector((state: RootState) => state.configuration.port);
     const snapcastConnected = useSelector((state: RootState) => state.snapcast.connected);
+    const websocketConnect = useSelector((state: RootState) => state.control.connected);
+
     const navigationItems = [
         {name: "Main", icon: undefined, page: "main"},
         {name: "Settings", icon: undefined, page: "settings"}
@@ -64,9 +66,6 @@ export const Sidebar: React.FC<SidebarProps> = ({onNavigate, page}) => {
             </nav>
             <div className="flex-grow w-full">
             </div>
-            <div className="border-2">
-                {snapcastConnected ? <Connected/> : <Disconnected/>}
-            </div>
             <div>
                 <label htmlFor="host">Host</label>
                 <input className="border-2 w-full" id="host" type="text" value={host}
@@ -75,6 +74,19 @@ export const Sidebar: React.FC<SidebarProps> = ({onNavigate, page}) => {
                 <input className="border-2 w-full" id="port" type="number" value={port}
                        onChange={onChangePort}/>
             </div>
+            <div>
+                <h3>SNAPCAST</h3>
+                <div className="border-2">
+                    {snapcastConnected ? <Connected/> : <Disconnected/>}
+                </div>
+            </div>
+            <div>
+                <h3>CONTROL</h3>
+                <div className="border-2">
+                    {websocketConnect ? <Connected/> : <Disconnected/>}
+                </div>
+            </div>
+
         </aside>
     )
 }
