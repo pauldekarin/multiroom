@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+html, body, #root { /* Assuming your root React div has id="root" */
+    height: 100%;
+    width: 100%;
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+}
+
+:root {
+    --sidebar-width: 248px;
+    --playerbar-height: 128px;
+}
+
+.content {
+    display: grid;
+    grid-template-areas:
+    "sidebar content"
+    "sidebar playerbar";
+    grid-template-columns: var(--sidebar-width) auto;
+    grid-template-rows: auto  var(--playerbar-height);
+}
+
+
+
+
