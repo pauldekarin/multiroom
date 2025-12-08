@@ -62,6 +62,7 @@ export const createControlMiddleware = () => {
         return (next) => (action) => {
             if (action.type === controlSlice.actions.connect.type) {
                 lock.acquire(controlSlice.actions.connect.type, async () => {
+                    service.disconnectSafe();
                     const url = action.payload;
                     if (!URL.canParse(url)) {
                         return;

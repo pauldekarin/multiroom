@@ -2,6 +2,7 @@ import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
 import {LoggerFactory} from "../logger/LoggerFactory.ts";
 import type {Logger} from "../logger/Logger.ts";
 import {snapcastSlice} from "./snapcastSlice.ts";
+import {controlSlice} from "./controlSlice.ts";
 
 interface ConfigResponse {
     snapserver: SnapserverConfig;
@@ -30,7 +31,7 @@ export interface ConfigurationProps {
     snapserver: SnapserverConfig,
 }
 
-const defaultSnapserverConfig = () => {
+const defaultSnapserverConfig = (): SnapserverConfig => {
     return {
         ports: {
             http: -1,
@@ -40,14 +41,17 @@ const defaultSnapserverConfig = () => {
     }
 }
 
+const defaultWebsocketConfig = (): WebsocketConfig => {
+    return {
+        path: "",
+        port: -1
+    }
+}
 const name: string = "configuration";
 const initialState: ConfigurationProps = {
     host: window.location.hostname,
     port: Number(8080),
-    websocket: {
-        path: "/ws",
-        port: Number(window.location.port)
-    },
+    websocket: defaultWebsocketConfig(),
     snapserver: defaultSnapserverConfig()
 }
 
@@ -96,7 +100,11 @@ export const createConfigurationMiddleware = () => {
                     logger.error("Failed to fetch config:", err);
                     store.dispatch(
                         configurationSlice.actions.setSnapserverConfiguration(defaultSnapserverConfig())
-                    )
+                    );
+                    store.dispatch({
+                        type: configurationSlice.actions.setWebsocketConfiguration.type,
+                        payload: defaultWebsocketConfig()
+                    })
                 });
         }
 
@@ -122,6 +130,14 @@ export const createConfigurationMiddleware = () => {
                     type: snapcastSlice.actions.connect.type,
                     payload: url
                 });
+            }
+            if (configurationSlice.actions.setWebsocketConfiguration.match(action)) {
+                const config = action.payload as WebsocketConfig;
+                const url = `ws://${store.getState().configuration.host}:${config.port}${config.path}`;
+                store.dispatch({
+                    type: controlSlice.actions.connect.type,
+                    payload: url
+                })
             }
             if (configurationSlice.actions.connect.match(action)) {
                 const state = store.getState().configuration;
