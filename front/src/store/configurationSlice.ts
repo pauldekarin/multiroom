@@ -102,7 +102,6 @@ export const createConfigurationMiddleware = () => {
                     logger.error("Failed to fetch config:", err);
                 });
         }
-
         return result;
     };
 };

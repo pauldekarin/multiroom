@@ -12,9 +12,9 @@ export const store = configureStore({
         configuration: configurationSlice.reducer,
     },
     middleware: getDefaultMiddleware => getDefaultMiddleware()
+        .concat(createConfigurationMiddleware())
         .concat(createControlMiddleware())
         .concat(createSnapcastMiddleware())
-        .concat(createConfigurationMiddleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;
