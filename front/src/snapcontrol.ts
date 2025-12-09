@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 namespace Snapcast {
     export interface Host {
         arch: string;
@@ -100,13 +102,13 @@ namespace Snapcast {
     }
 
     export class Mapper {
-        public static toHost(json): Host {
+        public static toHost(json: any): Host {
             return {
-                arch: json.arch,
-                ip: json.ip,
-                mac: json.mac,
-                name: json.name,
-                os: json.os,
+                arch: json ? json.arch : "",
+                ip: json ? json.ip : "",
+                mac: json ? json.mac : "",
+                name: json ? json.name : "",
+                os: json ? json.os : "",
             }
         }
 
@@ -287,7 +289,6 @@ class SnapControl {
     onConnectionChanged: ((_this: SnapControl, _connected: boolean, _error?: string) => any) | null;
 
     private onNotification(notification: any): boolean {
-        let stream!: Snapcast.Stream;
         switch (notification.method) {
             case 'Client.OnVolumeChanged':
                 this.getClient(notification.params.id).config.volume = notification.params.volume;

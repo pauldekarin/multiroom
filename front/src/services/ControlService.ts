@@ -1,15 +1,20 @@
-import CloseEvent = WebSocket.CloseEvent;
-import ErrorEvent = WebSocket.ErrorEvent;
+type CloseEvent = WebSocketEventMap["close"];
+type ErrorEvent = WebSocketEventMap["error"];
+
 import {Logger} from "../logger/Logger.ts";
 import {LoggerFactory} from "../logger/LoggerFactory.ts";
 import {Notifier} from "../notifier/notifier.ts";
 import {ConnectionStatus} from "./SnapcastService.ts";
 
-export enum IControlMessageType {
-    MASTER_PLAYER = 'MASTER_PLAYER',
-    CONNECTION_STATUS = 'CONNECTION_STATUS',
-    MESSAGE = 'MESSAGE',
-}
+export const IControlMessageType = {
+    MASTER_PLAYER: 'MASTER_PLAYER',
+    CONNECTION_STATUS: 'CONNECTION_STATUS',
+    MESSAGE: 'MESSAGE',
+} as const;
+
+export type IControlMessageType =
+    typeof IControlMessageType[keyof typeof IControlMessageType];
+
 
 export type IControlMessageData = {
     type: IControlMessageType;
@@ -24,18 +29,17 @@ export type IControlMessage = {
 
 export interface MasterPlayerControlMessage extends IControlMessage {
     message: {
-        type: IControlMessageType.MASTER_PLAYER;
-        payload: { volume: number, muted: boolean };
+        type: typeof IControlMessageType.MASTER_PLAYER;
+        payload: { volume: number; muted: boolean };
     };
 }
 
 export interface ControlConnectionStatusMessage extends IControlMessage {
     message: {
-        type: IControlMessageType.CONNECTION_STATUS;
+        type: typeof IControlMessageType.CONNECTION_STATUS;
         payload: { status: ConnectionStatus };
-    }
+    };
 }
-
 
 export type NotifyUnion = IControlMessage | MasterPlayerControlMessage;
 

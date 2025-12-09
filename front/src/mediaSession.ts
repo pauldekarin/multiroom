@@ -109,19 +109,29 @@ export class MediaSession {
 
             mediaSession.playbackState = play_state;
             mediaSession.setActionHandler('play', properties.canPlay ? () => {
-                this.snapcontrol.control(this.streamId, 'play')
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'play');
+                }
             } : null);
             mediaSession.setActionHandler('pause', properties.canPause ? () => {
-                this.snapcontrol.control(this.streamId, 'pause')
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'pause');
+                }
             } : null);
             mediaSession.setActionHandler('previoustrack', properties.canGoPrevious ? () => {
-                this.snapcontrol.control(this.streamId, 'previous')
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'previous');
+                }
             } : null);
             mediaSession.setActionHandler('nexttrack', properties.canGoNext ? () => {
-                this.snapcontrol.control(this.streamId, 'next')
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'next');
+                }
             } : null);
             mediaSession.setActionHandler('stop', properties.canControl ? () => {
-                this.snapcontrol.control(this.streamId, 'stop')
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'stop');
+                }
             } : null);
             const defaultSkipTime: number = 10; // Time to skip in seconds by default
             mediaSession.setActionHandler('seekbackward', properties.canSeek ?
@@ -129,21 +139,27 @@ export class MediaSession {
                     const offset: number = (event.seekOffset || defaultSkipTime) * -1;
                     if (properties.position !== undefined)
                         Math.max(properties.position! + offset, 0);
-                    this.snapcontrol.control(this.streamId, 'seek', {'offset': offset})
+                    if (this.streamId) {
+                        this.snapcontrol.control(this.streamId, 'seek', {'offset': offset})
+                    }
                 } : null);
 
             mediaSession.setActionHandler('seekforward', properties.canSeek ? (event: MediaSessionActionDetails) => {
                 const offset: number = event.seekOffset || defaultSkipTime;
                 if ((metadata?.duration !== undefined) && (properties.position !== undefined))
                     Math.min(properties.position! + offset, metadata.duration!);
-                this.snapcontrol.control(this.streamId, 'seek', {'offset': offset})
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'seek', {'offset': offset})
+                }
             } : null);
 
             mediaSession.setActionHandler('seekto', properties.canSeek ? (event: MediaSessionActionDetails) => {
                 const position: number = event.seekTime || 0;
                 if (metadata?.duration !== undefined)
                     Math.min(position, metadata.duration!);
-                this.snapcontrol.control(this.streamId, 'setPosition', {'position': position})
+                if (this.streamId) {
+                    this.snapcontrol.control(this.streamId, 'setPosition', {'position': position})
+                }
             } : null);
 
             if ((metadata?.duration !== undefined) && (properties.position !== undefined) && (properties.position! <= metadata.duration!)) {

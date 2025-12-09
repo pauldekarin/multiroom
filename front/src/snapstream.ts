@@ -31,8 +31,11 @@ interface IAudioContextPatched extends IAudioContext {
 }
 
 class AudioContextPatched extends AudioContext implements IAudioContextPatched {
+
     get outputLatency(): number {
-        const ctx = (<any>this)._nativeAudioContext;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const ctx = (<unknown>this)._nativeAudioContext;
         if (ctx && ctx.outputLatency !== undefined) {
             return ctx.outputLatency;
         }
@@ -368,6 +371,8 @@ class PcmChunkMessage extends BaseMessage {
 
 
 class AudioStream {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     constructor(public _timeProvider: TimeProvider, public _sampleFormat: SampleFormat, public _bufferMs: number) {
     }
 
@@ -657,7 +662,7 @@ class FlacDecoder extends Decoder {
         super();
         this.decoder = Flac.create_libflac_decoder(true);
         if (this.decoder) {
-            const init_status = Flac.init_decoder_stream(this.decoder, this.read_callback_fn.bind(this), this.write_callback_fn.bind(this), this.error_callback_fn.bind(this), this.metadata_callback_fn.bind(this), false);
+            // const init_status = Flac.init_decoder_stream(this.decoder, this.read_callback_fn.bind(this), this.write_callback_fn.bind(this), this.error_callback_fn.bind(this), this.metadata_callback_fn.bind(this), false);
             //console.log("Flac init: " + init_status);
             Flac.setOptions(this.decoder, {analyseSubframes: true, analyseResiduals: true});
         }
@@ -747,7 +752,7 @@ class FlacDecoder extends Decoder {
     }
 
     /** @memberOf decode */
-    error_callback_fn(err: any, errMsg: any) {
+    error_callback_fn(_: any, __: any) {
         //console.error('decode error callback', err, errMsg);
     }
 

@@ -47,6 +47,18 @@ export const Sidebar: React.FC<SidebarProps> = ({onNavigate, page}) => {
         dispatch(configurationSlice.actions.setPort(Number(event.target.value)));
     };
 
+    const active = {
+        backgroundColor: 'green',
+        cursor: 'pointer',
+        color: 'white',
+    };
+
+    const inactive = {
+        backgroundColor: 'gray',
+        cursor: 'not-allowed',
+        color: 'white',
+    };
+
     return (
         <aside className={"border-2 flex flex-col"} style={{gridArea: "sidebar"}}>
             <div>
@@ -58,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({onNavigate, page}) => {
                     {navigationItems.map(item => (
                         <li key={item.name} className="text-center">
                             <button key={item.page} onClick={() => onNavigate(item.page)}>
-                                <span>{item.name}</span>
+                                <span style={page == item.page ? active : inactive}>{item.name}</span>
                             </button>
                         </li>
                     ))}

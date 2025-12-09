@@ -1,4 +1,11 @@
-import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {
+    createSlice,
+    type Dispatch,
+    type Middleware,
+    type MiddlewareAPI,
+    type PayloadAction,
+    type UnknownAction
+} from "@reduxjs/toolkit";
 import {masterPlayerSlice} from "./masterPlayerSlice.ts";
 import {
     type ControlConnectionStatusMessage,
@@ -9,6 +16,7 @@ import {
 import {SnapStream} from "../snapstream.ts";
 import {ConnectionStatus} from "../services/SnapcastService.ts";
 import AsyncLock from "async-lock"
+import type {RootState} from "./store.ts";
 
 const name = "control"
 
@@ -33,11 +41,11 @@ export const controlSlice = createSlice({
     }
 })
 
-export const createControlMiddleware = () => {
+export const createControlMiddleware = (): Middleware => {
     const service: ControlService = new ControlService(SnapStream.getClientId());
     const lock = new AsyncLock();
 
-    return (store) => {
+    return (store: MiddlewareAPI<Dispatch<UnknownAction>, RootState>) => {
         service.on(IControlMessageType.CONNECTION_STATUS, (notification) => {
             const data = notification as ControlConnectionStatusMessage;
             if (data.message.payload.status == ConnectionStatus.CONNECTED) {
@@ -60,7 +68,7 @@ export const createControlMiddleware = () => {
             })
         })
         return (next) => (action) => {
-            if (action.type === controlSlice.actions.connect.type) {
+            if (controlSlice.actions.connect.match(action)) {
                 lock.acquire(controlSlice.actions.connect.type, async () => {
                     service.disconnectSafe();
                     const url = action.payload;
