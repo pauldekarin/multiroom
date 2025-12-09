@@ -1,8 +1,16 @@
-import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {
+    createSlice,
+    type Dispatch,
+    type Middleware,
+    type MiddlewareAPI,
+    type PayloadAction,
+    type UnknownAction
+} from "@reduxjs/toolkit";
 import {LoggerFactory} from "../logger/LoggerFactory.ts";
 import type {Logger} from "../logger/Logger.ts";
 import {snapcastSlice} from "./snapcastSlice.ts";
 import {controlSlice} from "./controlSlice.ts";
+import type {RootState} from "./store.ts";
 
 interface ConfigResponse {
     snapserver: SnapserverConfig;
@@ -76,10 +84,10 @@ export const configurationSlice = createSlice({
     }
 })
 
-export const createConfigurationMiddleware = () => {
+export const createConfigurationMiddleware = (): Middleware => {
     const logger: Logger = LoggerFactory.getLogger("configuration-middleware");
 
-    return (store) => {
+    return (store: MiddlewareAPI<Dispatch<UnknownAction>, RootState>) => {
         const connect = (url: string) => {
             logger.info(`Fetching configuration from ${url}`);
 
@@ -101,54 +109,57 @@ export const createConfigurationMiddleware = () => {
                     store.dispatch(
                         configurationSlice.actions.setSnapserverConfiguration(defaultSnapserverConfig())
                     );
-                    store.dispatch({
-                        type: configurationSlice.actions.setWebsocketConfiguration.type,
-                        payload: defaultWebsocketConfig()
-                    })
+                    store.dispatch(
+                        configurationSlice.actions.setWebsocketConfiguration(defaultWebsocketConfig())
+                    );
                 });
-        }
-
-        return (next) => (action) => {
-            if (configurationSlice.actions.setHost.match(action) ||
-                configurationSlice.actions.setPort.match(action)) {
-                const result = next(action);
-
-                const state = store.getState().configuration;
-
-                const scheme = "http://";
-                const api = "/api/config";
-                const url = `${scheme}${state.host}:${state.port}${api}`;
-
-                connect(url);
-
-                return result;
-            }
-            if (configurationSlice.actions.setSnapserverConfiguration.match(action)) {
-                const config = action.payload as SnapserverConfig;
-                const url = `ws://${store.getState().configuration.host}:${config.ports.http}`;
-                store.dispatch({
-                    type: snapcastSlice.actions.connect.type,
-                    payload: url
-                });
-            }
-            if (configurationSlice.actions.setWebsocketConfiguration.match(action)) {
-                const config = action.payload as WebsocketConfig;
-                const url = `ws://${store.getState().configuration.host}:${config.port}${config.path}`;
-                store.dispatch({
-                    type: controlSlice.actions.connect.type,
-                    payload: url
-                })
-            }
-            if (configurationSlice.actions.connect.match(action)) {
-                const state = store.getState().configuration;
-
-                const scheme = "http://";
-                const api = "/api/config";
-                const url = `${scheme}${state.host}:${state.port}${api}`;
-
-                connect(url);
-            }
-            return next(action);
         };
-    }
+        return (next) =>
+            (action) => {
+
+
+                if (configurationSlice.actions.setHost.match(action) ||
+                    configurationSlice.actions.setPort.match(action)) {
+
+                    const result = next(action);
+                    const state = store.getState().configuration;
+
+                    const api = `/api/config`;
+                    const url = `http://${state.host}:${state.port}${api}`;
+
+                    connect(url);
+                    return result;
+                }
+
+                if (configurationSlice.actions.setSnapserverConfiguration.match(action)) {
+                    const config = action.payload as SnapserverConfig;
+                    const url = `ws://${store.getState().configuration.host}:${config.ports.http}`;
+
+                    store.dispatch({
+                        type: snapcastSlice.actions.connect.type,
+                        payload: url
+                    });
+                }
+
+                if (configurationSlice.actions.setWebsocketConfiguration.match(action)) {
+                    const config = action.payload as WebsocketConfig;
+                    const url = `ws://${store.getState().configuration.host}:${config.port}${config.path}`;
+
+                    store.dispatch({
+                        type: controlSlice.actions.connect.type,
+                        payload: url
+                    });
+                }
+
+                if (configurationSlice.actions.connect.match(action)) {
+                    const state = store.getState().configuration;
+                    const api = `/api/config`;
+                    const url = `http://${state.host}:${state.port}${api}`;
+
+                    connect(url);
+                }
+
+                return next(action);
+            };
+    };
 };

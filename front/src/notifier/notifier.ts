@@ -27,13 +27,13 @@ export class Notifier<T extends string, A extends object> {
         if (!this.#subscribers[event]) {
             this.#subscribers[event] = [];
         }
-        let index = this.#subscribers[event].findIndex(element => element === handler);
+        const index: number = this.#subscribers[event].findIndex(element => element === handler);
         if (index !== -1) {
             this.#subscribers[event].splice(index, 1);
         }
     }
 
-    public notify(event: T, msg?: A) {
+    public notify(event: T, msg: A) {
         if (this.#subscribers[event]) {
             for (const subscriber of this.#subscribers[event]) {
                 subscriber(msg);

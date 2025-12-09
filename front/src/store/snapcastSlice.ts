@@ -1,4 +1,11 @@
-import {createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {
+    createSlice,
+    type Dispatch,
+    type Middleware,
+    type MiddlewareAPI,
+    type PayloadAction,
+    type UnknownAction
+} from "@reduxjs/toolkit";
 import {
     ConnectionStatus,
     type ISnapcastNotificationPayload,
@@ -9,6 +16,7 @@ import {
 } from "../services/SnapcastService.ts";
 import {Snapcast} from "../snapcontrol.ts";
 import {masterPlayerSlice} from "./masterPlayerSlice.ts";
+import type {RootState} from "./store.ts";
 
 const name = "snapcast";
 
@@ -34,14 +42,15 @@ export const snapcastSlice = createSlice({
         setSnapserver: (state, action: PayloadAction<Snapcast.Server>) => {
             state.snapserver = action.payload;
         },
-        setClientMuted: (state, action: PayloadAction<{ muted: boolean, clientId: string }>) => {
+        setClientMuted: (_, __: PayloadAction<{ muted: boolean, clientId: string }>) => {
         },
-        setClientVolume: (state, action: PayloadAction<{ volume: number, clientId: string }>) => {
+        setClientVolume: (_, __: PayloadAction<{ volume: number, clientId: string }>) => {
         },
+
     }
 })
 
-export const createSnapcastMiddleware = () => {
+export const createSnapcastMiddleware = (): Middleware => {
     const snapcast = new SnapcastService();
     const connect = (url: string): void => {
         snapcast.disconnect();
@@ -51,7 +60,7 @@ export const createSnapcastMiddleware = () => {
         snapcast.connect(url);
     }
 
-    return (store) => {
+    return (store: MiddlewareAPI<Dispatch<UnknownAction>, RootState>) => {
         snapcast.on(SnapcastNotificationType.ON_CONNECTION_STATUS, (notification: ISnapcastNotificationPayload) => {
             const payload = notification as SnapcastConnectionStatusPayload;
             if (payload.connectionStatus === ConnectionStatus.CONNECTED) {

@@ -5,16 +5,23 @@ import {Logger} from "../logger/Logger.ts";
 import {LoggerFactory} from "../logger/LoggerFactory.ts";
 import {Notifier} from "../notifier/notifier.ts";
 
-export enum ConnectionStatus {
-    CONNECTING, CONNECTED, DISCONNECTED, FAILED
-}
+export const ConnectionStatus = {
+    CONNECTING: "CONNECTING",
+    CONNECTED: "CONNECTED",
+    DISCONNECTED: "DISCONNECTED",
+    FAILED: "FAILED"
+} as const;
 
-export enum SnapcastNotificationType {
-    ON_CONNECTION_STATUS = "ON_CONNECTION_STATUS",
-    ON_SNAPSERVER = "ON_SNAPSERVER",
-}
+export type ConnectionStatus = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 
-export type ISnapcastNotificationPayload = {}
+export const SnapcastNotificationType = {
+    ON_CONNECTION_STATUS: "ON_CONNECTION_STATUS",
+    ON_SNAPSERVER: "ON_SNAPSERVER",
+} as const;
+
+export type SnapcastNotificationType = typeof SnapcastNotificationType[keyof typeof SnapcastNotificationType];
+
+export type ISnapcastNotificationPayload = Record<string, unknown>;
 
 export type SnapcastConnectionStatusPayload = &ISnapcastNotificationPayload & {
     connectionStatus: ConnectionStatus;
@@ -86,10 +93,6 @@ export class SnapcastService {
 
     public setVolumeClient(clientId: string, volume: number): void {
         this._snapcontrol.setVolume(clientId, volume, this._snapcontrol.getClient(clientId).config.volume.muted);
-    }
-
-    public setStreamGroup(groupdId: string, streamId: string): void {
-
     }
 
     private _onChange(_control: SnapControl, server: Snapcast.Server) {
